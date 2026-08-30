@@ -19,6 +19,8 @@ void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void adc_callback ();
 void temperature_callback ();
+void tm_start_callback();
+void tm_stop_callback();
 
 api_t device_api[] =
 {
@@ -32,6 +34,8 @@ api_t device_api[] =
 	{"wmem", wmem_callback, "show mem"},
 	{"get_adc", adc_callback, "measure with ADC"},
 	{"get_temp", temperature_callback, "measure internal temperature with ADC"},
+	{"tm_start", tm_start_callback, "start telemetry"},
+	{"tm_stop", tm_stop_callback, "stop telemetry"},
 	{NULL, NULL, NULL},
 };
 
@@ -49,6 +53,7 @@ int main()
     {
 		protocol_task_handle(stdio_task_handle());
 		led_task_handle();
+		adc_task_handle();
     }
 	return 0;
 }
@@ -142,9 +147,23 @@ void adc_callback ()
 {
 	float voltage_V = adc_task_measure();
 	printf("%f\n", voltage_V);
+	return;
 }
 
 void temperature_callback (){
 	float temp_C = adc_task_measure_temperature();
 	printf("%f\n", temp_C);
+	return;
+}
+
+void tm_start_callback()
+{
+	adc_task_set_state(ADC_TASK_STATE_RUN);
+	return;
+}
+
+void tm_stop_callback()
+{
+	adc_task_set_state(ADC_TASK_STATE_IDLE);
+	return;
 }
