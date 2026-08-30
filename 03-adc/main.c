@@ -18,6 +18,7 @@ void led_blink_set_period_ms_callback(const char* args);
 void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void adc_callback ();
+void temperature_callback ();
 
 api_t device_api[] =
 {
@@ -30,6 +31,7 @@ api_t device_api[] =
 	{"mem", mem_callback, "show mem"},
 	{"wmem", wmem_callback, "show mem"},
 	{"get_adc", adc_callback, "measure with ADC"},
+	{"get_temp", temperature_callback, "measure internal temperature with ADC"},
 	{NULL, NULL, NULL},
 };
 
@@ -140,4 +142,9 @@ void adc_callback ()
 {
 	float voltage_V = adc_task_measure();
 	printf("%f\n", voltage_V);
+}
+
+void temperature_callback (){
+	float temp_C = adc_task_measure_temperature();
+	printf("%f\n", temp_C);
 }
