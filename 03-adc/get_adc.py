@@ -1,6 +1,6 @@
 import time
 import serial
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 def read_value(ser):
@@ -40,7 +40,22 @@ def main():
             time.sleep(0.1)
     finally:
         ser.close()
-        print("Port closed")  
+        print("Port closed")
+        
+        plt.subplot(2, 1, 1)
+        plt.plot(measure_ts, measure_voltage_V)
+        plt.title('График зависимости напряжения от времени')
+        plt.xlabel('время, с')
+        plt.ylabel('напряжение, В')
+
+        plt.subplot(2, 1, 2)
+        plt.plot(measure_ts, measure_temperature_C)
+        plt.title('График зависимости температуры от времени')
+        plt.xlabel('время, с')
+        plt.ylabel('температура, C')
+
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == "__main__":
