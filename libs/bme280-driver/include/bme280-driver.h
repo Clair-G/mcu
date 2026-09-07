@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+
 //типы указателей на функции для чтения и записи данных в I2C шину
 typedef void (*bme280_i2c_read)(uint8_t* buffer, uint16_t length);
 typedef void (*bme280_i2c_write)(uint8_t* data, uint16_t size);
@@ -15,6 +16,9 @@ void bme280_read_regs(uint8_t start_reg_address, uint8_t* buffer, uint8_t length
 
 //прототип функции записи в регистр BME280:
 void bme280_write_reg(uint8_t reg_address, uint8_t value);
+
+//прототип функции чтения значений температуры
+uint16_t bme280_read_temp_raw();
 
 //тип для объединения всех переменных, необходимых для работы драйвера
 typedef struct

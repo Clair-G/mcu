@@ -20,6 +20,9 @@ void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void read_regs_callback(const char* args);
 void write_reg_callback(const char* args);
+void temp_raw_callback(const char* args);
+void press_raw_callback(const char* args);
+void hum_raw_callback(const char* args);
 
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length);
 void rp2040_i2c_write(uint8_t* data, uint16_t size);
@@ -36,6 +39,9 @@ api_t device_api[] =
 	{"wmem", wmem_callback, "write mem"},
 	{"read_regs", read_regs_callback, "read regs from bme280"},
 	{"write_reg", write_reg_callback, "write value to reg from bme280"},
+	{"temp_raw", temp_raw_callback, "read raw temperature value from bme280"},
+	{"press_raw", press_raw_callback, "read raw pressure value from bme280"},
+	{"hum_raw", hum_raw_callback, "read raw humidity value from bme280"},	
 	{NULL, NULL, NULL},
 };
 
@@ -224,6 +230,29 @@ void write_reg_callback(const char* args)
 }
 
 
+void temp_raw_callback(const char* args)
+{
+	uint16_t temp_raw = bme280_read_temp_raw();
+	printf("%u\n", temp_raw);
+	return;
+}
+
+void press_raw_callback(const char* args)
+{
+	uint16_t press_raw = bme280_read_press_raw();
+	printf("%u\n", press_raw);
+	return;
+}
+
+
+void hum_raw_callback(const char* args)
+{
+	uint16_t hum_raw = bme280_read_hum_raw();
+	printf("%u\n", hum_raw);
+	return;
+}
+
+
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length)
 {
 	i2c_read_timeout_us(i2c1, 0x76, buffer, length, false, 100000);
@@ -239,10 +268,10 @@ void rp2040_i2c_write(uint8_t* data, uint16_t size)
 		printf("PICO_ERROR_GENERIC\n");
 	else if (ret == PICO_ERROR_TIMEOUT)
 		printf("PICO_ERROR_TIMEOUT\n");
-	else 
-		printf("%u\n", ret);
+
 
 	return;
 }
+
 
 
