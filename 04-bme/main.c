@@ -19,6 +19,7 @@ void led_blink_set_period_ms_callback(const char* args);
 void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void read_regs_callback(const char* args);
+void write_reg_callback(const char* args);
 
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length);
 void rp2040_i2c_write(uint8_t* data, uint16_t size);
@@ -33,7 +34,8 @@ api_t device_api[] =
 	{"set_period", led_blink_set_period_ms_callback, "set led blink period"},
 	{"mem", mem_callback, "show mem"},
 	{"wmem", wmem_callback, "write mem"},
-	{"read_reg", read_regs_callback, "read regs from bme280"},
+	{"read_regs", read_regs_callback, "read regs from bme280"},
+	{"write_reg", write_reg_callback, "write value to reg from bme280"},
 	{NULL, NULL, NULL},
 };
 
@@ -169,7 +171,7 @@ void read_regs_callback(const char* args)
 			args = space_symbol + 1;
 			
 			uint32_t quantity = 0;
-			sscanf(args, "%u", &quantity);
+			sscanf(args, "%x", &quantity);
 		//	printf("%u\n", quantity);
 			if ((quantity >= 0 && quantity <= 0xFF) && (addr + quantity <= 0x100))
 			{
@@ -187,11 +189,47 @@ void read_regs_callback(const char* args)
 	return;
 }
 
+void write_reg_callback(const char* args)
+{
+	//вытаскиваем из строки аргуметнов адрес и количество регистров
+	uint32_t addr = 0;
+		
+	sscanf(args, "%x", &addr);
+	if (addr >= 0xFF || addr < 0)
+		printf("Not valid start reg address\n");
+	else 
+	{	
+		char* space_symbol = strchr(args, ' ');
+
+		if (!space_symbol) //нет второго аргумента
+		{
+			printf("No value\n");
+		}	
+		else
+		{
+			//*space_symbol = '\0';
+			args = space_symbol + 1;
+			
+			uint32_t value = 0;
+			sscanf(args, "%x", &value);
+		//	printf("%u\n", quantity);
+			if ((value >= 0 && value <= 0xFF) )
+			{
+				bme280_write_reg(addr, value);
+			}
+		}
+	}
+	
+	return;
+}
+
+
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length)
 {
 	i2c_read_timeout_us(i2c1, 0x76, buffer, length, false, 100000);
 	return;
 }
+
 
 void rp2040_i2c_write(uint8_t* data, uint16_t size)
 {
@@ -206,3 +244,5 @@ void rp2040_i2c_write(uint8_t* data, uint16_t size)
 
 	return;
 }
+
+
