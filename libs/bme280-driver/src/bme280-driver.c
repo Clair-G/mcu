@@ -21,5 +21,14 @@ void bme280_read_regs(uint8_t start_reg_address, uint8_t* buffer, uint8_t length
 	
 	//прочитать по I2C шине желаемое количество регистров сразу в буффер пользователя
 	bme280_ctx.i2c_read(buffer, length);
-		
+	
+	return;		
+}
+
+void bme280_write_reg(uint8_t reg_address, uint8_t value)
+{
+	uint8_t data[2] = {reg_address, value};
+	bme280_ctx.i2c_write(data, sizeof(data));
+	
+	return;	
 }

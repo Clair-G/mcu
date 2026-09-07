@@ -13,6 +13,9 @@ void bme280_init(bme280_i2c_read i2c_read, bme280_i2c_write i2c_write);
 //прототип функции чтения регистров BME280
 void bme280_read_regs(uint8_t start_reg_address, uint8_t* buffer, uint8_t length);
 
+//прототип функции записи в регистр BME280:
+void bme280_write_reg(uint8_t reg_address, uint8_t value);
+
 //тип для объединения всех переменных, необходимых для работы драйвера
 typedef struct
 {
