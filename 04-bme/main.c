@@ -23,6 +23,9 @@ void write_reg_callback(const char* args);
 void temp_raw_callback(const char* args);
 void press_raw_callback(const char* args);
 void hum_raw_callback(const char* args);
+void temp_callback(const char* args);
+void press_callback(const char* args);
+void hum_callback(const char* args);
 
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length);
 void rp2040_i2c_write(uint8_t* data, uint16_t size);
@@ -42,6 +45,9 @@ api_t device_api[] =
 	{"temp_raw", temp_raw_callback, "read raw temperature value from bme280"},
 	{"press_raw", press_raw_callback, "read raw pressure value from bme280"},
 	{"hum_raw", hum_raw_callback, "read raw humidity value from bme280"},	
+	{"temp", temp_callback, "read temperature value from bme280"},
+	{"press", press_callback, "read pressure value from bme280"},
+	{"hum", hum_callback, "read humidity value from bme280"},	
 	{NULL, NULL, NULL},
 };
 
@@ -60,6 +66,7 @@ int main()
 	protocol_task_init(device_api);
 // ???	
 	bme280_init(rp2040_i2c_read, rp2040_i2c_write);
+	
 	
     while (1)
     {
@@ -232,7 +239,8 @@ void write_reg_callback(const char* args)
 
 void temp_raw_callback(const char* args)
 {
-	uint16_t temp_raw = bme280_read_temp_raw();
+//	uint16_t temp_raw = bme280_read_temp_raw();
+	uint32_t temp_raw = bme280_read_temp_raw();
 	printf("%u\n", temp_raw);
 	return;
 }
@@ -249,6 +257,32 @@ void hum_raw_callback(const char* args)
 {
 	uint16_t hum_raw = bme280_read_hum_raw();
 	printf("%u\n", hum_raw);
+	return;
+}
+
+void temp_callback(const char* args)
+{
+	
+	int32_t temperature = bme280_read_temp();
+
+	printf("Temp. = %.2f C\n", temperature / 100.f);
+	
+	return;
+}
+
+void press_callback(const char* args)
+{
+	int32_t pressure = bme280_read_press();
+	printf("Pressure = %.3f кПа\n", pressure / 1000.f);
+	
+	return;
+}
+
+void hum_callback(const char* args)
+{
+	uint32_t humidity = bme280_read_hum();
+	printf("Humidity = %.3f %% \n", humidity / 1024.f);
+	
 	return;
 }
 
@@ -272,6 +306,4 @@ void rp2040_i2c_write(uint8_t* data, uint16_t size)
 
 	return;
 }
-
-
 
