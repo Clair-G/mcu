@@ -72,6 +72,15 @@ int32_t bme280_read_press();
 //прототип функции чтения значений влажности
 uint32_t bme280_read_hum();
 
+//прототип функции включения непрервного режима измерений
+void bme280_set_tm_on();
+
+//прототип функции отключения непрервного режима измерений
+void bme280_set_tm_off();
+
+//прототип функции-обработчика задания (телеметрия)
+void bme280_task();
+
 
 //тип для объединения всех переменных, необходимых для работы драйвера
 typedef struct
@@ -80,6 +89,11 @@ typedef struct
 	bme280_i2c_write i2c_write;
 } bme280_ctx_t;
 
+typedef enum
+{
+	BME280_TM_OFF = 0,
+	BME280_TM_ON = 1,
+} bme280_tm_state_t;
 
 
 //контекст драйвера BME280
@@ -87,4 +101,6 @@ static bme280_ctx_t bme280_ctx = {0};
 
 //калибровочные параметры экземпляра BME280
 static bmp280_calib_param_t params = {0};
+
+static bme280_tm_state_t bme280_tm_state;
 

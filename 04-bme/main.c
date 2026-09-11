@@ -26,6 +26,8 @@ void hum_raw_callback(const char* args);
 void temp_callback(const char* args);
 void press_callback(const char* args);
 void hum_callback(const char* args);
+void tm_start_callback();
+void tm_stop_callback();
 
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length);
 void rp2040_i2c_write(uint8_t* data, uint16_t size);
@@ -48,6 +50,8 @@ api_t device_api[] =
 	{"temp", temp_callback, "read temperature value from bme280"},
 	{"press", press_callback, "read pressure value from bme280"},
 	{"hum", hum_callback, "read humidity value from bme280"},	
+	{"tm_start", tm_start_callback, "start telemetry"},
+	{"tm_stop", tm_stop_callback, "stop telemetry"},
 	{NULL, NULL, NULL},
 };
 
@@ -64,7 +68,7 @@ int main()
 	led_task_init();
 	stdio_task_init();
 	protocol_task_init(device_api);
-// ???	
+
 	bme280_init(rp2040_i2c_read, rp2040_i2c_write);
 	
 	
@@ -265,7 +269,8 @@ void temp_callback(const char* args)
 	
 	int32_t temperature = bme280_read_temp();
 
-	printf("Temp. = %.2f C\n", temperature / 100.f);
+//	printf("Temp. = %.2f C\n", temperature / 100.f);
+	printf("%.2f\n", temperature / 100.f);
 	
 	return;
 }
@@ -273,7 +278,8 @@ void temp_callback(const char* args)
 void press_callback(const char* args)
 {
 	int32_t pressure = bme280_read_press();
-	printf("Pressure = %.3f кПа\n", pressure / 1000.f);
+//	printf("Pressure = %.3f кПа\n", pressure / 1000.f);
+	printf("%.3f\n", pressure / 1000.f);
 	
 	return;
 }
@@ -281,12 +287,24 @@ void press_callback(const char* args)
 void hum_callback(const char* args)
 {
 	uint32_t humidity = bme280_read_hum();
-	printf("Humidity = %.3f %% \n", humidity / 1024.f);
+//	printf("Humidity = %.3f %% \n", humidity / 1024.f);
+	printf("%.3f\n", humidity / 1024.f);
 	
 	return;
 }
+///----------
+void tm_start_callback()
+{
+	bme280_set_tm_on();
+	return;
+}
 
-
+void tm_stop_callback()
+{
+	bme280_set_tm_off();
+	return;
+}
+///----------
 void rp2040_i2c_read(uint8_t* buffer, uint16_t length)
 {
 	i2c_read_timeout_us(i2c1, 0x76, buffer, length, false, 100000);

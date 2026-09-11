@@ -230,3 +230,33 @@ uint32_t bme280_read_hum()
 	
 	return (uint32_t)(hum >> 12);
 }
+
+
+void bme280_set_tm_on()
+{
+	bme280_tm_state = BME280_TM_ON;
+	return;
+}
+
+void bme280_set_tm_off()
+{
+	bme280_tm_state = BME280_TM_ON;
+	return;
+}
+/////-----------------!!!
+void bme280_task()
+{
+/*	
+	if (bme280_tm_state == BME280_TM_ON)
+	{
+		if (time_us_64() > adc_ts) // adc_ts == 0 at first
+			{
+				adc_ts = time_us_64() + ADC_TASK_MEAS_PERIOD_US;
+				float voltage_V = adc_task_measure();
+				float temp_C = adc_task_measure_temperature();
+				printf("%f %f\n", voltage_V, temp_C);
+			}
+	}
+*/	
+	return;
+}
