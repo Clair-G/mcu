@@ -9,6 +9,8 @@
 #include "led-task/led-task.h"
 
 #include "ili9341-driver.h"
+#include "ili9341-display.h"
+#include "ili9341-font.h"
 
 #define DEVICE_NAME "my-pico-device"
 #define DEVICE_VRSN "v0.0.1"
@@ -92,6 +94,23 @@ int main()
 	ili9341_init(&ili9341_display, &ili9341_hal);
 	ili9341_set_rotation(&ili9341_display, ILI9341_ROTATION_90);
 	
+	ili9341_fill_screen(&ili9341_display, COLOR_BLACK);
+	sleep_ms(300);
+	/* 2. Coloured rectangles */
+	ili9341_draw_filled_rect(&ili9341_display, 10, 10, 100, 60, COLOR_RED);
+	ili9341_draw_filled_rect(&ili9341_display, 120, 10, 100, 60, COLOR_GREEN);
+	ili9341_draw_filled_rect(&ili9341_display, 230, 10, 80, 60, COLOR_BLUE);
+	/* 3. Hollow rectangle outline */
+	ili9341_draw_rect(&ili9341_display, 10, 90, 300, 80, COLOR_WHITE);
+
+	/* 4. Diagonal lines */
+	ili9341_draw_line(&ili9341_display, 0, 0, 319, 239, COLOR_YELLOW);
+	ili9341_draw_line(&ili9341_display, 319, 0, 0, 239, COLOR_CYAN);
+
+	ili9341_draw_text(&ili9341_display, 20, 100, "Hello, ILI9341!", &jetbrains_font, COLOR_WHITE, COLOR_BLACK);
+
+	ili9341_draw_text(&ili9341_display, 20, 116, "RP2040 / Pico SDK", &jetbrains_font, COLOR_YELLOW, COLOR_BLACK);
+
     while (1)
     {
 		stdio_task_handle();
