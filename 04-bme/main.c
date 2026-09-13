@@ -74,7 +74,8 @@ int main()
 	
     while (1)
     {
-		protocol_task_handle(stdio_task_handle());
+		stdio_task_handle();
+		protocol_task_handle();
 		led_task_handle();
     }
 	return 0;
