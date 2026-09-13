@@ -1,12 +1,25 @@
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "pico/stdlib.h"
+#include "hardware/spi.h"
 #include "stdio-task/stdio-task.h"
 #include "protocol-task/protocol-task.h"
 #include "led-task/led-task.h"
 
+#include "ili9341-driver.h"
+
 #define DEVICE_NAME "my-pico-device"
 #define DEVICE_VRSN "v0.0.1"
+
+#define ILI9341_PIN_MISO 4
+#define ILI9341_PIN_CS 10
+#define ILI9341_PIN_SCK 6
+#define ILI9341_PIN_MOSI 7
+#define ILI9341_PIN_DC 8
+#define ILI9341_PIN_RESET 9
+// #define PIN_LED -> 3.3V
 
 void version_callback(const char* args);
 void help_callback(const char* args);
@@ -16,6 +29,13 @@ void led_blink_callback(const char* args);
 void led_blink_set_period_ms_callback(const char* args);
 void mem_callback(const char* args);
 void wmem_callback(const char* args);
+
+void rp2040_spi_write(const uint8_t *data, uint32_t size);
+void rp2040_spi_read(uint8_t *buffer, uint32_t length);
+void rp2040_gpio_cs_write(bool level);
+void rp2040_gpio_dc_write(bool level);
+void rp2040_gpio_reset_write(bool level);
+void rp2040_delay_ms(uint32_t ms);
 
 api_t device_api[] =
 {
@@ -30,17 +50,51 @@ api_t device_api[] =
 	{NULL, NULL, NULL},
 };
 
+// контекст драйвера дисплея
+static ili9341_display_t ili9341_display = {0};
+
 int main()
 {
     stdio_init_all();
 	
-	led_task_init();
 	stdio_task_init();
 	protocol_task_init(device_api);
+	led_task_init();
 	
+	spi_init(spi0, 62500000);
+	
+	gpio_init(ILI9341_PIN_MISO);
+	gpio_init(ILI9341_PIN_MOSI);
+	gpio_init(ILI9341_PIN_SCK);
+	gpio_set_function(ILI9341_PIN_MISO, GPIO_FUNC_SPI);
+	gpio_set_function(ILI9341_PIN_MOSI, GPIO_FUNC_SPI);
+	gpio_set_function(ILI9341_PIN_SCK, GPIO_FUNC_SPI);
+	
+	gpio_init(ILI9341_PIN_CS);
+	gpio_init(ILI9341_PIN_DC);
+	gpio_init(ILI9341_PIN_RESET);
+    gpio_set_dir(ILI9341_PIN_CS, GPIO_OUT);
+	gpio_set_dir(ILI9341_PIN_DC, GPIO_OUT);
+	gpio_set_dir(ILI9341_PIN_RESET, GPIO_OUT);
+	
+	gpio_put(ILI9341_PIN_CS, true);
+	gpio_put(ILI9341_PIN_DC, false);
+	gpio_put(ILI9341_PIN_RESET, false);
+	
+	ili9341_hal_t ili9341_hal = {0};
+	ili9341_hal.spi_write = rp2040_spi_write;
+	ili9341_hal.spi_read = rp2040_spi_read;
+	ili9341_hal.gpio_cs_write = rp2040_gpio_cs_write;
+	ili9341_hal.gpio_dc_write = rp2040_gpio_dc_write;
+	ili9341_hal.gpio_reset_write = rp2040_gpio_reset_write;
+	ili9341_hal.delay_ms = rp2040_delay_ms;
+	
+	ili9341_init(&ili9341_display, &ili9341_hal);
+	ili9341_set_rotation(&ili9341_display, ILI9341_ROTATION_90);
 	
     while (1)
     {
+		stdio_task_handle();
 		protocol_task_handle(stdio_task_handle());
 		led_task_handle();
     }
@@ -130,4 +184,34 @@ void wmem_callback(const char* args)
 	}
 	
 	return;
+}
+
+void rp2040_spi_write(const uint8_t *data, uint32_t size)
+{
+	spi_write_blocking(spi0, data, size);
+}
+
+void rp2040_spi_read(uint8_t *buffer, uint32_t length)
+{
+	spi_read_blocking(spi0, 0, buffer, length);
+}
+
+void rp2040_gpio_cs_write(bool level)
+{
+	gpio_put(ILI9341_PIN_CS, level);
+}
+
+void rp2040_gpio_dc_write(bool level)
+{
+	gpio_put(ILI9341_PIN_DC, level);
+}
+
+void rp2040_gpio_reset_write(bool level)
+{
+	gpio_put(ILI9341_PIN_RESET, level);
+}
+
+void rp2040_delay_ms(uint32_t ms)
+{
+	sleep_ms(ms);
 }

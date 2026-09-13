@@ -4,7 +4,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
-const uint LED_PIN = 25;
+const uint LED_PIN = 22;
 uint LED_BLINK_PERIOD_US = 500000;
 
 uint64_t led_ts;

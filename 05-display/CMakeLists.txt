@@ -28,6 +28,7 @@ add_subdirectory("../libs/ili9341-driver"
 # Указываем на какие библиотеки ссылается наш код - типовая строчка для любого CMakeLists.txt
 target_link_libraries(${PROJECT_NAME}
 	pico_stdlib
+	hardware_spi
 	ili9341
 )
 
