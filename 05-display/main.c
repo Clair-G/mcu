@@ -33,6 +33,10 @@ void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void disp_screen_callback(const char* args);
 void disp_px_callback(const char* args);
+void disp_line_callback(const char* args);
+void disp_rect_callback(const char* args);
+void disp_frect_callback(const char* args);
+void disp_text_callback(const char* args);
 
 void rp2040_spi_write(const uint8_t *data, uint32_t size);
 void rp2040_spi_read(uint8_t *buffer, uint32_t length);
@@ -52,7 +56,11 @@ api_t device_api[] =
 	{"mem", mem_callback, "show mem"},
 	{"wmem", wmem_callback, "show mem"},
 	{"disp_screen", disp_screen_callback, "show screen of chosen colour"},	
-	{"disp_px", disp_px_callback, "show pixel of chosen colour"},	
+	{"disp_px", disp_px_callback, "show pixel (x,y)of chosen colour"},	
+	{"disp_line", disp_line_callback, "show line from (x1,y1) to (x2,y2) of chosen colour"},	
+	{"disp_rect", disp_rect_callback, "show rectangle from (x1,y1) of chosen width and height of chosen line colour"},	
+	{"disp_frect", disp_frect_callback, "show rectangle from (x1,y1) of chosen width and height filled with chosen colour"},
+	{"disp_text", disp_text_callback, "show text starting on chosen place of chosen colour with chosen background colour"},	
 	{NULL, NULL, NULL},
 };
 
@@ -230,8 +238,7 @@ void disp_px_callback(const char* args)
 	uint32_t x = 0;
 	uint32_t y = 0;
 	int result = sscanf(args, "%d %d %x", &x, &y, &c);
-	printf("%d \n", result);
-	printf("%d %d %x\n", x, y, c);
+
 	uint16_t color = COLOR_BLACK;
 	
 	if (result == 3)
@@ -241,6 +248,109 @@ void disp_px_callback(const char* args)
 	
 	ili9341_draw_pixel(&ili9341_display, x, y, color);
 }
+
+void disp_line_callback(const char* args)
+{
+	uint32_t c = 0;
+	uint32_t x1 = 0;
+	uint32_t y1 = 0;
+	uint32_t x2 = 0;
+	uint32_t y2 = 0;
+
+	int result = sscanf(args, "%d %d %d %d %x", &x1, &y1, &x2, &y2, &c);
+	uint16_t color = COLOR_BLACK;
+	
+	if (result == 5)
+	{
+		color = RGB888_2_RGB565(c);
+	}
+	
+	ili9341_draw_line(&ili9341_display, x1, y1, x2, y2, color);
+}
+
+void disp_rect_callback(const char* args)
+{
+	uint32_t c = 0;
+	uint32_t x1 = 0;
+	uint32_t y1 = 0;
+	uint32_t x2 = 0;
+	uint32_t y2 = 0;
+
+	int result = sscanf(args, "%d %d %d %d %x", &x1, &y1, &x2, &y2, &c);
+
+	uint16_t color = COLOR_BLACK;
+	
+	if (result == 5)
+	{
+		color = RGB888_2_RGB565(c);
+	}
+	
+	ili9341_draw_rect(&ili9341_display, x1, y1, x2, y2, color);
+}
+
+void disp_frect_callback(const char* args)
+{
+	uint32_t c = 0;
+	uint32_t x1 = 0;
+	uint32_t y1 = 0;
+	uint32_t x2 = 0;
+	uint32_t y2 = 0;
+
+	int result = sscanf(args, "%d %d %d %d %x", &x1, &y1, &x2, &y2, &c);
+
+	uint16_t color = COLOR_BLACK;
+	
+	if (result == 5)
+	{
+		color = RGB888_2_RGB565(c);
+	}
+	
+	ili9341_draw_filled_rect(&ili9341_display, x1, y1, x2, y2, color);
+}
+
+void disp_text_callback(const char* args)
+{
+	uint16_t color_txt = COLOR_BLACK;
+	uint16_t color_bg = COLOR_WHITE;
+	uint16_t start_x = 100;	
+	uint16_t start_y  = 100;	
+	char text[255];
+		
+	uint32_t c_bg = 0;
+	uint32_t c_txt = 0;
+	uint32_t x = 0;
+	uint32_t y = 0;
+	char txt[255];
+// считать сначала текст, если он есть - читать остальное
+	int result = sscanf(args, "%s %d %d %x %x", txt, &x, &y, &c_txt, &c_bg);
+
+	if (result >= 1)
+	{
+		strcpy(text, txt);
+		printf("%s\n", txt);
+		printf("%s\n", text);
+	}	
+	else  strcpy(text, "No text provided");
+		
+	if (result >=3)
+	{
+		start_x = x;
+		start_y = y;
+	}	
+	
+	if (result >= 4)
+	{
+		color_txt = RGB888_2_RGB565(c_txt);
+	}
+	
+	if (result >= 5)
+	{
+		color_bg = RGB888_2_RGB565(c_bg);
+	}
+
+	ili9341_draw_text(&ili9341_display, start_x, start_y, text, &jetbrains_font, color_txt, color_bg);
+}
+
 
 void rp2040_spi_write(const uint8_t *data, uint32_t size)
 {
