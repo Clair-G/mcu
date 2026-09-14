@@ -32,6 +32,7 @@ void led_blink_set_period_ms_callback(const char* args);
 void mem_callback(const char* args);
 void wmem_callback(const char* args);
 void disp_screen_callback(const char* args);
+void disp_px_callback(const char* args);
 
 void rp2040_spi_write(const uint8_t *data, uint32_t size);
 void rp2040_spi_read(uint8_t *buffer, uint32_t length);
@@ -50,7 +51,8 @@ api_t device_api[] =
 	{"set_period", led_blink_set_period_ms_callback, "set led blink period"},
 	{"mem", mem_callback, "show mem"},
 	{"wmem", wmem_callback, "show mem"},
-	{"disp_screen", disp_screen_callback, "show blue screeen"},	
+	{"disp_screen", disp_screen_callback, "show screen of chosen colour"},	
+	{"disp_px", disp_px_callback, "show pixel of chosen colour"},	
 	{NULL, NULL, NULL},
 };
 
@@ -222,6 +224,23 @@ void disp_screen_callback(const char* args)
 	ili9341_fill_screen(&ili9341_display, color);
 }
 
+void disp_px_callback(const char* args)
+{
+	uint32_t c = 0;
+	uint32_t x = 0;
+	uint32_t y = 0;
+	int result = sscanf(args, "%d %d %x", &x, &y, &c);
+	printf("%d \n", result);
+	printf("%d %d %x\n", x, y, c);
+	uint16_t color = COLOR_BLACK;
+	
+	if (result == 3)
+	{
+		color = RGB888_2_RGB565(c);
+	}
+	
+	ili9341_draw_pixel(&ili9341_display, x, y, color);
+}
 
 void rp2040_spi_write(const uint8_t *data, uint32_t size)
 {
